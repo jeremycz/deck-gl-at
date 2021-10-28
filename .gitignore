@@ -1,5 +1,7 @@
 # project-specific
 .nvmrc
+public/data/*
+!*.gitkeep
 
 # dependencies
 /node_modules
