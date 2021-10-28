@@ -1,29 +1,46 @@
 import React from 'react';
 import DeckGL from '@deck.gl/react';
-import { LineLayer } from '@deck.gl/layers';
+import { GeoJsonLayer } from '@deck.gl/layers';
 import { StaticMap } from 'react-map-gl';
 
 // Viewport settings
 const INITIAL_VIEW_STATE = {
-  longitude: -122.41669,
-  latitude: 37.7853,
-  zoom: 13,
+  longitude: 174.841,
+  latitude: -36.9141,
+  zoom: 12,
   pitch: 0,
   bearing: 0,
 };
 
-// Data to be used by the LineLayer
-const data = [
-  {
-    sourcePosition: [-122.41669, 37.7853],
-    targetPosition: [-122.41669, 37.781],
-  },
-];
-
 function App() {
+  const stops = fetch('data/stops-processed.json', {
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      const features = Object.keys(data).map((key) => ({
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [data[key].stop_lon, data[key].stop_lat],
+        },
+        properties: {
+          name: data[key].stop_name,
+        },
+      }));
+
+      return {
+        type: 'FeatureCollection',
+        features,
+      };
+    });
+
   return (
     <DeckGL initialViewState={INITIAL_VIEW_STATE} controller>
-      <LineLayer id="line-layer" data={data} />
+      <GeoJsonLayer id="test-layer" data={stops} getPointRadius={20} />
       <StaticMap mapboxApiAccessToken={process.env.REACT_APP_MAPBOX_API_TOKEN} />
     </DeckGL>
   );
